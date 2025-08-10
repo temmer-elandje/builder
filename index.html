@@ -3,511 +3,358 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LEGO 5-Blokjes – Raad het Object</title>
+  <title>LEGO 5-Blokjes – Digitale Bouwer</title>
   <style>
     :root {
-      --bg: #0b0f14;
-      --card: #111827;
-      --muted: #9ca3af;
-      --text: #e5e7eb;
-      --accent: #22c55e;
-      --accent-2: #3b82f6;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 18px;
+      --bg: #0b0f14; --panel:#0f172a; --muted:#94a3b8; --text:#e2e8f0; --accent:#22c55e; --accent2:#3b82f6; --danger:#ef4444;
+      --grid:#1f2937; --stud:#111827; --shadow:0 10px 28px rgba(0,0,0,.35); --radius:16px;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1000px 700px at 20% 0%, #0d1420 0%, #0b0f14 40%, #0a0d12 100%);
-      color: var(--text);
-      display: grid; place-items: center; padding: 22px;
-    }
-    .app { width: min(980px, 100%); }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; background:radial-gradient(1000px 700px at 20% 0%, #0d1420 0%, #0b0f14 40%, #0a0d12 100%); color:var(--text); font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .app{max-width:1100px;margin:0 auto;padding:20px;display:grid;gap:12px}
+    .title{font-weight:900; font-size:clamp(22px,4vw,34px)}
+    .subtitle{color:var(--muted)}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px}
 
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0));
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(6px);
-      padding: 22px; margin-bottom: 16px;
-    }
-    .title { font-size: clamp(22px, 4vw, 34px); font-weight: 800; letter-spacing: .5px; }
-    .subtitle { color: var(--muted); margin-top: 6px; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .col { display: grid; gap: 10px; }
+    .left-right{display:grid; gap:12px}
+    @media (min-width:980px){ .left-right{grid-template-columns: 320px 1fr;} }
 
-    .btn { cursor: pointer; border: 0; border-radius: 14px; padding: 12px 16px; font-weight: 700; color: white; transition: transform .06s ease, filter .2s ease, opacity .2s ease; box-shadow: var(--shadow); }
-    .btn:hover { filter: brightness(1.04); }
-    .btn:active { transform: translateY(1px) scale(0.99); }
-    .btn-primary { background: linear-gradient(135deg, var(--accent-2), #2563eb); }
-    .btn-accent { background: linear-gradient(135deg, var(--accent), #16a34a); }
-    .btn-ghost { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid rgba(255,255,255,.08); }
-    .btn-danger { background: linear-gradient(135deg, var(--danger), #b91c1c); }
-    .btn-warning { background: linear-gradient(135deg, var(--warning), #d97706); }
-    .tag { font-size: 12px; color: var(--muted); border: 1px dashed rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 10px; }
+    .btn{cursor:pointer;border:0;border-radius:12px;padding:10px 12px;font-weight:800;color:white; box-shadow:var(--shadow);}
+    .btn:active{transform:translateY(1px) scale(.99)}
+    .btn-ghost{background:rgba(255,255,255,.06); color:var(--text); border:1px solid rgba(255,255,255,.08)}
+    .btn-accent{background:linear-gradient(135deg,var(--accent),#16a34a)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent2),#2563eb)}
+    .btn-danger{background:linear-gradient(135deg,var(--danger),#b91c1c)}
 
-    .grid { display: grid; gap: 16px; }
-    @media (min-width: 800px) { .grid.two { grid-template-columns: 1fr 1fr; } }
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-weight:700}
+    .small{font-size:12px;color:var(--muted)}
 
-    .word {
-      font-size: clamp(26px, 6vw, 60px); font-weight: 900; letter-spacing: .6px; text-align: center;
-      padding: 24px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
-      user-select: none;
-    }
-    .hidden-word { filter: blur(14px); opacity: .4; }
+    .palette{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px}
+    .tool{display:grid;gap:8px}
+    .seg{display:grid;gap:8px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px}
 
-    .pill {
-      display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px;
-      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
-      font-weight: 700; letter-spacing: .2px;
-    }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    label{font-size:12px;color:var(--muted)}
+    input[type="number"], select{width:100%; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text); border-radius:10px; padding:8px 10px; outline:none}
+    input[type="color"]{ width:100%; height:36px; border:1px solid rgba(255,255,255,.2); border-radius:10px; background:none; padding:0 }
 
-    .footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 16px; }
+    canvas{width:100%; height:640px; background:linear-gradient(180deg,#0e1624,#0b1220); border:1px solid rgba(255,255,255,.08); border-radius:16px}
 
-    .badge { font-size: 12px; opacity: .9; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); }
-    .ok { background: rgba(34,197,94,.15); border-color: rgba(34,197,94,.45); }
-    .no { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.45); }
-
-    details { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); padding: 10px 12px; border-radius: 12px; }
-    details[open] { background: rgba(255,255,255,.05); }
-    summary { cursor: pointer; }
-    input, select, textarea { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: var(--text); border-radius: 12px; padding: 10px 12px; outline: none; }
-    label { font-size: 13px; color: var(--muted); }
-    .small { font-size: 13px; color: var(--muted); }
+    .legend{display:grid;grid-template-columns:repeat(3,auto);gap:6px;align-items:center}
+    .legend span{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="card">
-      <div class="row" style="justify-content: space-between; align-items: start; gap: 10px;">
-        <div>
-          <div class="title">LEGO 5-Blokjes – Raad het Object</div>
-          <div class="subtitle">Bouw met <b>max. 5 blokjes</b> en laat de ander raden. Ideaal als partyspel of in de klas.</div>
+    <div class="row" style="justify-content:space-between">
+      <div>
+        <div class="title">LEGO 5-Blokjes – Digitale Bouwer</div>
+        <div class="subtitle">Bouw maximaal <b>5 blokjes</b> op een raster. Draai, verplaats, en wissel laag. Exporteer je model als JSON of PNG.</div>
+      </div>
+      <div class="row">
+        <span class="pill">Blokjes gebruikt: <b id="usedCount">0</b>/5</span>
+        <span class="pill">Laag: <b id="layerLabel">0</b></span>
+      </div>
+    </div>
+
+    <div class="left-right">
+      <!-- Tools -->
+      <div class="card tool">
+        <div class="seg">
+          <label>Bloktype</label>
+          <div class="palette">
+            <button class="btn btn-ghost" data-brick="1x1">1×1</button>
+            <button class="btn btn-ghost" data-brick="1x2">1×2</button>
+            <button class="btn btn-ghost" data-brick="2x2">2×2</button>
+            <button class="btn btn-ghost" data-brick="2x3">2×3</button>
+            <button class="btn btn-ghost" data-brick="2x4">2×4</button>
+            <button class="btn btn-ghost" data-brick="corner2x2">L‑hoek 2×2</button>
+          </div>
         </div>
-        <div class="row" style="gap:8px;">
-          <span class="pill" id="roundInfo">Ronde <span id="roundNum">1</span> · <span id="totalRounds">∞</span></span>
-          <span class="pill" title="Succes/Fail deze sessie"><span class="badge ok" id="s-ok">0✓</span> <span class="badge no" id="s-no">0✗</span></span>
+        <div class="seg">
+          <label>Kleur</label>
+          <input type="color" id="colorPicker" value="#e11d48" />
+          <div class="row">
+            <button class="btn btn-ghost quick-color" data-col="#e11d48">Rood</button>
+            <button class="btn btn-ghost quick-color" data-col="#f59e0b">Geel</button>
+            <button class="btn btn-ghost quick-color" data-col="#22c55e">Groen</button>
+            <button class="btn btn-ghost quick-color" data-col="#3b82f6">Blauw</button>
+            <button class="btn btn-ghost quick-color" data-col="#6b7280">Grijs</button>
+          </div>
+        </div>
+        <div class="seg">
+          <label>Acties</label>
+          <div class="row">
+            <button class="btn btn-primary" id="placeBtn">Plaats (of klik op raster)</button>
+            <button class="btn btn-ghost" id="rotateBtn">Draai (R)</button>
+            <button class="btn btn-ghost" id="raiseBtn" title="Laag omhoog">Laag ↑</button>
+            <button class="btn btn-ghost" id="lowerBtn" title="Laag omlaag">Laag ↓</button>
+          </div>
+          <div class="row">
+            <button class="btn btn-ghost" id="selectBtn">Selecteer/Verplaats (V)</button>
+            <button class="btn btn-danger" id="deleteBtn">Verwijder (Del)</button>
+          </div>
+        </div>
+        <div class="seg">
+          <label>Bestand</label>
+          <div class="row">
+            <button class="btn btn-ghost" id="exportJson">Export JSON</button>
+            <button class="btn btn-ghost" id="importJson">Import JSON</button>
+            <input type="file" id="fileInput" accept="application/json" style="display:none" />
+            <button class="btn btn-ghost" id="exportPng">Export PNG</button>
+            <button class="btn btn-ghost" id="resetBtn">Reset</button>
+          </div>
+          <div class="small">Sneltoetsen: R = draaien, V = selecteren, Del = verwijderen, 0–5 = laag kiezen.</div>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="card">
+        <canvas id="board" width="960" height="640" aria-label="bouwraster"></canvas>
+        <div class="row legend" style="margin-top:8px">
+          <span class="pill">Raster: 16×10 studs · 6 lagen (0–5)</span>
+          <span>Links‑klik: plaats/verplaats</span>
+          <span>Rechts‑klik: deselecteer</span>
         </div>
       </div>
     </div>
 
-    <div class="card grid two" id="setupCard">
-      <div class="col">
-        <h3 style="margin:0">1) Kies je rol</h3>
-        <div class="row">
-          <button class="btn btn-accent" id="roleBuilder">Ik ben Bouwer</button>
-          <button class="btn btn-primary" id="roleGuesser">Ik ben Rader</button>
-          <span class="tag">Tip: speel op hetzelfde scherm, maar draai even om bij het woord 😉</span>
-        </div>
-        <div class="col">
-          <label>Rondetijd (seconden)</label>
-          <input type="number" id="roundTime" min="10" max="300" step="5" value="60" />
-        </div>
-        <div class="row">
-          <div class="col" style="min-width:180px;">
-            <label>Moeilijkheid</label>
-            <select id="difficulty">
-              <option value="any">Gemengd</option>
-              <option value="easy">Makkelijk</option>
-              <option value="medium" selected>Normaal</option>
-              <option value="hard">Moeilijk</option>
-            </select>
-          </div>
-          <div class="col" style="min-width:220px;">
-            <label>Rondes (0 = onbeperkt)</label>
-            <input type="number" id="rounds" min="0" max="99" value="0" />
-          </div>
-        </div>
-        <div class="col">
-          <label>Eigen woorden (één per regel, optioneel)</label>
-          <textarea id="customWords" rows="4" placeholder="bijv. raket\nbrug\nwaaier"></textarea>
-        </div>
-        <div class="row">
-          <button class="btn btn-accent" id="startBtn">Start spel</button>
-          <button class="btn btn-ghost" id="importBtn">Importeer woordenlijst (JSON)</button>
-          <input id="fileInput" type="file" accept="application/json" style="display:none" />
-        </div>
-      </div>
-
-      <div class="col">
-        <h3 style="margin:0">Spelregels</h3>
-        <ul style="margin-top:6px; line-height:1.6; color:var(--muted)">
-          <li>De Bouwer ziet het woord en bouwt het met <b>maximaal 5 LEGO-blokjes</b>.</li>
-          <li>De Rader ziet geen woord, alleen de timer.</li>
-          <li>Is het geraden? Klik <b>✓ Goed</b>. Niet gelukt? Klik <b>✗ Mis</b>.</li>
-          <li>Gebruik je eigen woorden of de ingebouwde lijsten per moeilijkheidsgraad.</li>
-          <li>Speel solo (tijd verbeteren) of in teams (punten tellen).</li>
-        </ul>
-        <details>
-          <summary>Geavanceerd</summary>
-          <ul class="small">
-            <li>Woorden slaan niet op naar een server; alles blijft lokaal in je browser.</li>
-            <li>Via <b>Export</b> &amp; <b>Import</b> kun je lijsten meenemen naar een ander device.</li>
-            <li>Toetsen: <span class="mono">N</span> = Volgend woord, <span class="mono">Space</span> = Start/Pause, <span class="mono">G</span> = ✓ Goed, <span class="mono">M</span> = ✗ Mis.</li>
-          </ul>
-          <div class="row" style="margin-top:8px; gap:8px;">
-            <button class="btn btn-ghost" id="exportBtn">Exporteer woordenlijst</button>
-            <button class="btn btn-warning" id="resetStatsBtn" title="Wis score en ronde">Reset score</button>
-          </div>
-        </details>
-      </div>
-    </div>
-
-    <div class="card" id="playCard" style="display:none">
-      <div class="grid two">
-        <div class="col">
-          <div class="row" style="justify-content: space-between; align-items: center;">
-            <div class="pill">Max 5 blokjes</div>
-            <div class="pill">Moeilijkheid: <span id="diffLabel">-</span></div>
-            <div class="pill">Tijd: <span id="timeLeft">60</span>s</div>
-          </div>
-          <div style="margin-top:14px; text-align:center">
-            <div id="word" class="word hidden-word" aria-live="polite">Woord verborgen</div>
-            <div class="row" style="justify-content:center; margin-top:12px;">
-              <button class="btn btn-ghost" id="toggleWordBtn">Toon woord (Bouwer)</button>
-              <button class="btn btn-ghost" id="newWordBtn" title="Nieuw willekeurig woord">Nieuw woord (N)</button>
-            </div>
-          </div>
-          <div class="row" style="margin-top:12px; justify-content:center; gap:10px;">
-            <button class="btn btn-primary" id="startPauseBtn">Start (Space)</button>
-            <button class="btn btn-accent" id="goodBtn">✓ Goed (G)</button>
-            <button class="btn btn-danger" id="missBtn">✗ Mis (M)</button>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card" style="padding:14px;">
-            <div class="small">Scorebord</div>
-            <div class="row" style="align-items: center; gap: 12px; margin-top:6px;">
-              <div class="pill">Goed: <b id="scoreGood">0</b></div>
-              <div class="pill">Mis: <b id="scoreMiss">0</b></div>
-              <div class="pill">Totaal: <b id="scoreTotal">0</b></div>
-            </div>
-            <div style="margin-top:12px;">
-              <label class="small">Rondes</label>
-              <div class="row" style="gap: 6px;">
-                <button class="btn btn-ghost" id="prevRoundBtn" title="Vorige ronde">◀︎</button>
-                <div class="pill">Huidige: <b id="currentRound">1</b></div>
-                <button class="btn btn-ghost" id="nextRoundBtn" title="Volgende ronde">▶︎</button>
-              </div>
-            </div>
-            <div style="margin-top:12px;">
-              <label class="small">Sessie log</label>
-              <div id="log" style="height: 150px; overflow:auto; padding:8px; border:1px solid rgba(255,255,255,.08); border-radius:12px; background: rgba(255,255,255,.03);"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">Gemaakt voor GitHub Pages · Offline-vriendelijk · Geen trackers</div>
+    <div class="card small">Let op: dit is een 2D‑topdown bouwer met <b>lagen</b> (z‑niveau). Geen echte 3D‑fysica. Wil je een 3D‑versie met orbit‑camera, dan kan ik die ook bouwen (met of zonder externe library).</div>
   </div>
 
-  <script>
-  // --- Utility helpers ---
-  const $ = (q) => document.querySelector(q);
-  const on = (el, ev, fn) => el.addEventListener(ev, fn);
-  const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
-  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+<script>
+(function(){
+  const cvs = document.getElementById('board');
+  const ctx = cvs.getContext('2d');
 
-  // --- Default word lists ---
-  const LISTS = {
-    easy: [
-      "auto", "huis", "boom", "vis", "kat", "hond", "brug", "boot", "zon", "maan",
-      "bal", "taart", "bloem", "trein", "stoel", "tafel", "munt", "sleutel", "vlag", "molen",
-      "appel", "ijs", "bed", "boek", "vogel", "kop", "bus", "fiets", "raam", "deur"
-    ],
-    medium: [
-      "raket", "robot", "camera", "toren", "kasteel", "gieter", "schaar", "klok", "trommel", "ladder",
-      "gitaar", "helikopter", "krab", "tand", "zwaan", "paraplu", "vulkaan", "pinguïn", "tractor", "kruiwagen",
-      "zwaartekraan", "duikbril", "kaars", "slede", "rups", "ufo", "dinosaurus", "telescoop", "schommel", "glijbaan"
-    ],
-    hard: [
-      "ruimtestation", "tandarts", "theater", "pizzasnijder", "kompas", "tolbrug", "elektrische gitaar", "brandweerwagen", "luchtballon", "kano",
-      "meetlat", "magnetron", "schipbreuk", "skilift", "zandloper", "koekoeksklok", "kruimeldief", "zonnewijzer", "doolhof", "kabelbaan",
-      "periscoop", "sterrenbeeld", "schrijfmachine", "graafmachine", "regenboog", "laserzwaard", "duikboot", "recycler", "tolkantoor", "zwerfkei"
-    ]
+  const GRID_W = 16, GRID_H = 10, STUD = 40; // px per stud
+  const MAX_BLOCKS = 5; const MAX_LAYER = 5;
+
+  function $(q){return document.querySelector(q)}
+  function on(el,ev,fn){el.addEventListener(ev,fn)}
+
+  // State
+  const state = {
+    blocks: [], // {id,type,w,h,x,y,rot,color,layer}
+    sel: null,
+    tool: 'place', // place | select
+    brick: '2x4', rot: 0, color: '#e11d48', layer: 0
   };
 
-  // Clean up a few too-hard words for 5-brick constraint
-  LISTS.medium = LISTS.medium.filter(w => w !== "zwaartekraan");
-
-  // --- State ---
-  let state = {
-    role: null, // 'builder' | 'guesser'
-    time: 60,
-    difficulty: 'medium',
-    rounds: 0, // 0 = infinite
-    currentRound: 1,
-    pool: [],
-    used: new Set(),
-    word: null,
-    running: false,
-    timerId: null,
-    left: 60,
-    scoreGood: 0,
-    scoreMiss: 0,
-    log: []
+  // Brick library (stud sizes before rotation)
+  const BRICKS = {
+    '1x1': {w:1,h:1}, '1x2': {w:1,h:2}, '2x2': {w:2,h:2}, '2x3': {w:2,h:3}, '2x4': {w:2,h:4},
+    'corner2x2': {w:2,h:2, mask: [[1,1],[1,0]] } // L‑vorm (mask in rot0)
   };
 
-  // --- DOM refs ---
-  const setupCard = $('#setupCard');
-  const playCard = $('#playCard');
-  const wordEl = $('#word');
-  const timeLeft = $('#timeLeft');
-  const sOk = $('#s-ok');
-  const sNo = $('#s-no');
-  const scoreGood = $('#scoreGood');
-  const scoreMiss = $('#scoreMiss');
-  const scoreTotal = $('#scoreTotal');
-  const logEl = $('#log');
+  // Helpers
+  const inBounds = (x,y)=> x>=0 && y>=0 && x<GRID_W && y<GRID_H;
+  const toGrid = (px,py)=> ({gx: Math.floor(px/STUD), gy: Math.floor(py/STUD)});
 
-  // --- Persistence ---
-  const save = () => localStorage.setItem('lego5_state', JSON.stringify({
-    scoreGood: state.scoreGood, scoreMiss: state.scoreMiss, currentRound: state.currentRound
-  }));
-  const load = () => {
-    try {
-      const s = JSON.parse(localStorage.getItem('lego5_state'));
-      if (!s) return;
-      state.scoreGood = s.scoreGood || 0;
-      state.scoreMiss = s.scoreMiss || 0;
-      state.currentRound = s.currentRound || 1;
-      updateScore();
-      $('#currentRound').textContent = state.currentRound;
-    } catch {}
-  };
-
-  // --- Word management ---
-  function buildPool(difficulty, custom) {
-    let p = [];
-    if (difficulty === 'any') p = [...LISTS.easy, ...LISTS.medium, ...LISTS.hard];
-    else p = [...(LISTS[difficulty] || [])];
-    if (custom && custom.length) p = p.concat(custom);
-    // shuffle
-    for (let i = p.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [p[i], p[j]] = [p[j], p[i]];
+  function dims(type, rot){
+    const b = BRICKS[type];
+    if(!b) return {w:1,h:1};
+    if(type==='corner2x2'){ // mask rotates
+      return {w:2, h:2};
     }
-    return p;
+    return rot%2===0 ? {w:b.w, h:b.h} : {w:b.h, h:b.w};
   }
 
-  function pickWord() {
-    if (!state.pool.length) {
-      // refill from used
-      state.used = new Set();
-      state.pool = buildPool(state.difficulty, state.custom);
+  function overlaps(a,b){
+    if(a.layer!==b.layer) return false;
+    // mask-aware for corner
+    const cellsA = cells(a), cellsB = cells(b);
+    for(const ca of cellsA){ for(const cb of cellsB){ if(ca.x===cb.x && ca.y===cb.y) return true; } }
+    return false;
+  }
+
+  function cells(bl){
+    const list = [];
+    if(bl.type==='corner2x2'){
+      // base mask rot=0: [[1,1],[1,0]] where [x][y]
+      const masks = [
+        [[1,1],[1,0]], // rot0
+        [[1,1],[0,1]], // rot1
+        [[0,1],[1,1]], // rot2
+        [[1,0],[1,1]], // rot3
+      ];
+      const m = masks[bl.rot%4];
+      for(let dx=0; dx<2; dx++) for(let dy=0; dy<2; dy++) if(m[dx][dy]) list.push({x:bl.x+dx,y:bl.y+dy,layer:bl.layer});
+      return list;
     }
-    let w = state.pool.pop();
-    // Avoid immediate repeats
-    while (state.used.has(w) && state.pool.length) w = state.pool.pop();
-    state.used.add(w);
-    state.word = w;
-    wordEl.textContent = w;
+    const d = dims(bl.type, bl.rot);
+    for(let dx=0; dx<d.w; dx++) for(let dy=0; dy<d.h; dy++) list.push({x:bl.x+dx,y:bl.y+dy,layer:bl.layer});
+    return list;
   }
 
-  // --- UI updates ---
-  function updateScore() {
-    sOk.textContent = state.scoreGood + '✓';
-    sNo.textContent = state.scoreMiss + '✗';
-    scoreGood.textContent = state.scoreGood;
-    scoreMiss.textContent = state.scoreMiss;
-    scoreTotal.textContent = state.scoreGood + state.scoreMiss;
-    save();
+  function placeAt(gx,gy){
+    const d = dims(state.brick, state.rot);
+    if(state.blocks.length>=MAX_BLOCKS){ alert('Maximaal 5 blokjes geplaatst. Verwijder er eerst één.'); return; }
+    if(!inBounds(gx,gy) || !inBounds(gx+d.w-1, gy+d.h-1)) return;
+    const newb = { id: crypto.randomUUID(), type: state.brick, x:gx, y:gy, rot: state.rot%4, color: state.color, layer: state.layer };
+    // collision
+    for(const b of state.blocks){ if(overlaps(newb,b)) return; }
+    state.blocks.push(newb); state.sel = newb.id; draw(); updateUsed();
   }
 
-  function appendLog(entry) {
-    const line = document.createElement('div');
-    line.className = 'small';
-    const ts = new Date().toLocaleTimeString();
-    line.textContent = `[${ts}] ${entry}`;
-    logEl.prepend(line);
+  function blockAt(gx,gy, layer = state.layer){
+    // search top-most same layer first
+    for(let i=state.blocks.length-1;i>=0;i--){ const b=state.blocks[i]; if(b.layer!==layer) continue; if(cells(b).some(c=>c.x===gx && c.y===gy)) return b; }
+    // allow selecting other layer if none
+    for(let i=state.blocks.length-1;i>=0;i--){ const b=state.blocks[i]; if(cells(b).some(c=>c.x===gx && c.y===gy)) return b; }
+    return null;
   }
 
-  function setRole(r) {
-    state.role = r;
-    $('#diffLabel').textContent = labelForDifficulty(state.difficulty);
-    $('#roundNum').textContent = state.currentRound;
-    $('#totalRounds').textContent = state.rounds === 0 ? '∞' : state.rounds;
-    setupCard.style.display = 'none';
-    playCard.style.display = 'block';
-    pickWord();
-    if (r === 'builder') {
-      wordEl.classList.remove('hidden-word');
-      $('#toggleWordBtn').textContent = 'Verberg woord';
-    } else {
-      wordEl.classList.add('hidden-word');
-      $('#toggleWordBtn').textContent = 'Toon woord (Bouwer)';
-    }
-    state.left = state.time;
-    timeLeft.textContent = state.left;
+  function moveBlock(b,gx,gy){
+    if(!b) return; const d = dims(b.type, b.rot);
+    if(!inBounds(gx,gy) || !inBounds(gx+d.w-1, gy+d.h-1)) return false;
+    const old = {x:b.x, y:b.y, layer:b.layer};
+    b.x=gx; b.y=gy;
+    for(const other of state.blocks){ if(other.id!==b.id && overlaps(b,other)){ b.x=old.x; b.y=old.y; return false; } }
+    return true;
   }
 
-  function labelForDifficulty(d) {
-    return d === 'easy' ? 'Makkelijk' : d === 'medium' ? 'Normaal' : d === 'hard' ? 'Moeilijk' : 'Gemengd';
-  }
+  function rotateBlock(b){ if(!b) return; const r=(b.rot+1)%4; const old={x:b.x,y:b.y,rot:b.rot}; b.rot=r; if(!moveBlock(b,b.x,b.y)){ b.rot=old.rot; } }
 
-  function startTimer() {
-    if (state.running) return;
-    state.running = true;
-    $('#startPauseBtn').textContent = 'Pauze (Space)';
-    state.timerId = setInterval(() => {
-      state.left -= 1;
-      timeLeft.textContent = state.left;
-      if (state.left <= 0) {
-        pauseTimer();
-        beep();
-        appendLog(`⏰ Tijd voorbij bij woord: "${state.word}"`);
+  function setLayer(n){ state.layer = Math.max(0, Math.min(MAX_LAYER, n)); $('#layerLabel').textContent = state.layer; draw(); }
+
+  function removeSelected(){ if(!state.sel) return; const i = state.blocks.findIndex(b=>b.id===state.sel); if(i>=0){ state.blocks.splice(i,1); state.sel=null; draw(); updateUsed(); } }
+
+  function updateUsed(){ $('#usedCount').textContent = state.blocks.length; }
+
+  // Rendering
+  function draw(){
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    // grid
+    ctx.fillStyle = '#0a0f18'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    for(let x=0;x<=GRID_W;x++){ ctx.fillStyle= 'rgba(255,255,255,.06)'; ctx.fillRect(x*STUD,0,1,cvs.height); }
+    for(let y=0;y<=GRID_H;y++){ ctx.fillStyle= 'rgba(255,255,255,.06)'; ctx.fillRect(0,y*STUD,cvs.width,1); }
+
+    // Helps: render shadows per higher layer as offset
+    const layerOffset = (l)=> ({ox: l*2, oy: -l*3});
+
+    // Draw blocks by layer asc
+    const sorted = [...state.blocks].sort((a,b)=> a.layer-b.layer);
+    for(const b of sorted){
+      const off = layerOffset(b.layer);
+      const studs = cells(b);
+      // body
+      ctx.save();
+      ctx.translate(off.ox, off.oy);
+      // base rect
+      const d = dims(b.type, b.rot);
+      const x = b.x*STUD, y=b.y*STUD, w=d.w*STUD, h=d.h*STUD;
+      // body
+      ctx.fillStyle = b.color;
+      ctx.fillRect(x+2,y+2,w-4,h-4);
+      // top shine
+      const g = ctx.createLinearGradient(x,y,x,y+h);
+      g.addColorStop(0,'rgba(255,255,255,.25)'); g.addColorStop(1,'rgba(0,0,0,.15)');
+      ctx.fillStyle=g; ctx.fillRect(x+2,y+2,w-4,Math.max(0,h-4));
+      // studs (dimples)
+      for(const c of studs){
+        const cx = c.x*STUD + STUD/2; const cy = c.y*STUD + STUD/2;
+        ctx.beginPath(); ctx.arc(cx,cy,STUD*0.16,0,Math.PI*2); ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx-2,cy-2,STUD*0.12,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fill();
       }
-    }, 1000);
-  }
+      // outline
+      ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth=2; ctx.strokeRect(x+1,y+1,w-2,h-2);
 
-  function pauseTimer() {
-    if (!state.running) return;
-    state.running = false;
-    $('#startPauseBtn').textContent = 'Start (Space)';
-    clearInterval(state.timerId);
-  }
+      // selection
+      if(b.id===state.sel){ ctx.strokeStyle = '#facc15'; ctx.lineWidth=3; ctx.strokeRect(x+1,y+1,w-2,h-2); }
+      ctx.restore();
+    }
 
-  function resetTimer() {
-    pauseTimer();
-    state.left = state.time;
-    timeLeft.textContent = state.left;
-  }
+    // active layer highlight
+    ctx.fillStyle='rgba(59,130,246,.08)';
+    ctx.fillRect(0, state.layer*0, 0, 0); // placeholder for future per-layer shading
 
-  function nextRound() {
-    if (state.rounds && state.currentRound >= state.rounds) return; // capped
-    state.currentRound += 1;
-    $('#roundNum').textContent = state.currentRound;
-    $('#currentRound').textContent = state.currentRound;
-    save();
-  }
-
-  function prevRound() {
-    state.currentRound = Math.max(1, state.currentRound - 1);
-    $('#roundNum').textContent = state.currentRound;
-    $('#currentRound').textContent = state.currentRound;
-    save();
-  }
-
-  function beep() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = 'square';
-      o.frequency.value = 880;
-      o.connect(g); g.connect(ctx.destination);
-      g.gain.setValueAtTime(0.001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + 0.01);
-      o.start();
-      setTimeout(() => { g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2); o.stop(ctx.currentTime + 0.25); }, 200);
-    } catch {}
-  }
-
-  // --- Events ---
-  on($('#roleBuilder'), 'click', () => setRole('builder'));
-  on($('#roleGuesser'), 'click', () => setRole('guesser'));
-
-  on($('#startBtn'), 'click', () => {
-    state.time = clamp(parseInt($('#roundTime').value || '60', 10), 10, 300);
-    state.left = state.time;
-    state.difficulty = $('#difficulty').value;
-    state.rounds = clamp(parseInt($('#rounds').value || '0', 10), 0, 99);
-
-    const customRaw = $('#customWords').value.trim();
-    state.custom = customRaw ? customRaw.split(/\n+/).map(s => s.trim()).filter(Boolean) : [];
-
-    state.pool = buildPool(state.difficulty, state.custom);
-    $('#totalRounds').textContent = state.rounds === 0 ? '∞' : state.rounds;
-
-    // jump to role screen only after choosing a role
-    appendLog('🎮 Spel gestart');
-  });
-
-  on($('#toggleWordBtn'), 'click', () => {
-    if (state.role === 'guesser') {
-      // safety: confirm accidental reveal
-      if (wordEl.classList.contains('hidden-word')) {
-        if (!confirm('Alleen de bouwer mag het woord zien. Toch tonen?')) return;
+    // ghost preview for placement
+    if(state.tool==='place'){
+      if(mouse.in){
+        const d = dims(state.brick, state.rot);
+        const gx = Math.min(GRID_W-d.w, Math.max(0, mouse.gx));
+        const gy = Math.min(GRID_H-d.h, Math.max(0, mouse.gy));
+        const x = gx*STUD, y=gy*STUD; const w=d.w*STUD, h=d.h*STUD;
+        ctx.save(); const off = {ox: state.layer*2, oy:-state.layer*3}; ctx.translate(off.ox, off.oy);
+        ctx.fillStyle = hexToRgba(state.color, 0.35); ctx.fillRect(x+2,y+2,w-4,h-4);
+        ctx.strokeStyle = hexToRgba('#ffffff', 0.4); ctx.lineWidth=2; ctx.strokeRect(x+2,y+2,w-4,h-4);
+        ctx.restore();
       }
     }
-    wordEl.classList.toggle('hidden-word');
-    $('#toggleWordBtn').textContent = wordEl.classList.contains('hidden-word') ? 'Toon woord (Bouwer)' : 'Verberg woord';
-  });
-
-  on($('#newWordBtn'), 'click', () => { pickWord(); appendLog('🔀 Nieuw woord gekozen'); resetTimer(); });
-  on($('#startPauseBtn'), 'click', () => state.running ? pauseTimer() : startTimer());
-  on($('#goodBtn'), 'click', () => {
-    state.scoreGood++; updateScore(); appendLog(`✅ Goed: "${state.word}"`);
-    nextWordOrRound();
-  });
-  on($('#missBtn'), 'click', () => {
-    state.scoreMiss++; updateScore(); appendLog(`❌ Mis: "${state.word}"`);
-    nextWordOrRound();
-  });
-
-  on($('#prevRoundBtn'), 'click', () => prevRound());
-  on($('#nextRoundBtn'), 'click', () => {
-    if (state.rounds && state.currentRound >= state.rounds) return;
-    nextRound();
-  });
-
-  on($('#exportBtn'), 'click', () => {
-    const data = { easy: LISTS.easy, medium: LISTS.medium, hard: LISTS.hard };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'lego5_woorden.json'; a.click(); URL.revokeObjectURL(url);
-  });
-  on($('#importBtn'), 'click', () => $('#fileInput').click());
-  on($('#fileInput'), 'change', (e) => {
-    const file = e.target.files?.[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-        if (data.easy && data.medium && data.hard) {
-          LISTS.easy = data.easy; LISTS.medium = data.medium; LISTS.hard = data.hard;
-          appendLog('📥 Woordenlijst geïmporteerd');
-          alert('Woordenlijst geïmporteerd!');
-        } else {
-          alert('Ongeldig JSON-formaat. Verwacht key: easy, medium, hard');
-        }
-      } catch (err) { alert('Kon JSON niet lezen.'); }
-    };
-    reader.readAsText(file);
-  });
-
-  // Keyboard shortcuts
-  on(document, 'keydown', (e) => {
-    if (e.target.matches('input, textarea')) return; // ignore typing in inputs
-    if (e.key.toLowerCase() === 'n') { $('#newWordBtn').click(); }
-    if (e.key === ' ') { e.preventDefault(); $('#startPauseBtn').click(); }
-    if (e.key.toLowerCase() === 'g') { $('#goodBtn').click(); }
-    if (e.key.toLowerCase() === 'm') { $('#missBtn').click(); }
-  });
-
-  function nextWordOrRound() {
-    if (!state.rounds) { $('#newWordBtn').click(); resetTimer(); return; }
-    // advance within capped rounds
-    if (state.currentRound < state.rounds) {
-      nextRound(); $('#newWordBtn').click(); resetTimer();
-    } else {
-      pauseTimer();
-      appendLog('🏁 Einde van de sessie');
-      alert(`Klaar! Goed: ${state.scoreGood} · Mis: ${state.scoreMiss}`);
-    }
   }
+
+  function hexToRgba(hex,a){
+    const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex); if(!m) return `rgba(255,255,255,${a})`;
+    const r=parseInt(m[1],16), g=parseInt(m[2],16), b=parseInt(m[3],16); return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // Mouse / interaction
+  const mouse = {x:0,y:0,gx:0,gy:0,in:false, dragging:false, dragOffset:{dx:0,dy:0}};
+  on(cvs,'mousemove', (e)=>{ const r=cvs.getBoundingClientRect(); mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top; const g=toGrid(mouse.x,mouse.y); mouse.gx=g.gx; mouse.gy=g.gy; mouse.in=true; draw(); });
+  on(cvs,'mouseleave', ()=>{ mouse.in=false; draw();});
+
+  on(cvs,'contextmenu', (e)=>{ e.preventDefault(); state.sel=null; draw(); });
+
+  on(cvs,'mousedown', (e)=>{
+    const g = toGrid(mouse.x, mouse.y);
+    if(state.tool==='place'){
+      placeAt(g.gx, g.gy);
+    } else {
+      const b = blockAt(g.gx, g.gy);
+      if(b){ state.sel=b.id; const d = dims(b.type,b.rot); mouse.dragging=true; mouse.dragOffset={dx:g.gx-b.x, dy:g.gy-b.y}; draw(); }
+    }
+  });
+
+  on(cvs,'mouseup', ()=>{ mouse.dragging=false; });
+  on(cvs,'mousemove', ()=>{
+    if(mouse.dragging && state.tool==='select' && state.sel){ const b = state.blocks.find(x=>x.id===state.sel); if(!b) return; const g=toGrid(mouse.x,mouse.y); moveBlock(b, g.gx-mouse.dragOffset.dx, g.gy-mouse.dragOffset.dy); draw(); }
+  });
+
+  // UI controls
+  document.querySelectorAll('[data-brick]').forEach(btn=> on(btn,'click',()=>{ state.brick = btn.dataset.brick; document.querySelectorAll('[data-brick]').forEach(b=>b.classList.remove('btn-accent')); btn.classList.add('btn-accent'); }));
+  on($('#rotateBtn'),'click',()=>{ if(state.tool==='select' && state.sel){ rotateBlock(state.blocks.find(b=>b.id===state.sel)); } else { state.rot=(state.rot+1)%4; } draw(); });
+  on($('#placeBtn'),'click',()=> state.tool='place');
+  on($('#selectBtn'),'click',()=> state.tool='select');
+  on($('#raiseBtn'),'click',()=> setLayer(state.layer+1));
+  on($('#lowerBtn'),'click',()=> setLayer(state.layer-1));
+  on($('#deleteBtn'),'click',()=> removeSelected());
+  on($('#resetBtn'),'click',()=>{ if(confirm('Alles wissen?')){ state.blocks=[]; state.sel=null; updateUsed(); draw(); } });
+
+  document.querySelectorAll('.quick-color').forEach(b=> on(b,'click',()=>{ state.color=b.dataset.col; $('#colorPicker').value = rgbToHex(state.color); }));
+  on($('#colorPicker'),'input', (e)=> state.color = e.target.value);
+
+  function rgbToHex(c){ return c; }
+
+  // Import/Export
+  on($('#exportJson'),'click',()=>{
+    const data = { version:1, grid:[GRID_W,GRID_H], blocks: state.blocks };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='lego5_model.json'; a.click(); URL.revokeObjectURL(url);
+  });
+  on($('#importJson'),'click',()=> $('#fileInput').click());
+  on($('#fileInput'),'change',(e)=>{
+    const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d.blocks) throw new Error('geen blocks'); state.blocks = d.blocks.slice(0,MAX_BLOCKS); state.sel=null; updateUsed(); draw(); }catch(err){ alert('Kon JSON niet lezen.'); } }; r.readAsText(f);
+  });
+
+  on($('#exportPng'),'click',()=>{
+    // quick export (what you see)
+    const link = document.createElement('a'); link.href = cvs.toDataURL('image/png'); link.download='lego5_model.png'; link.click();
+  });
+
+  // Keys
+  on(window,'keydown',(e)=>{
+    if(['INPUT','SELECT'].includes(document.activeElement.tagName)) return;
+    if(e.key==='r' || e.key==='R'){ e.preventDefault(); $('#rotateBtn').click(); }
+    if(e.key==='v' || e.key==='V'){ e.preventDefault(); $('#selectBtn').click(); }
+    if(e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); $('#deleteBtn').click(); }
+    if(/^[0-5]$/.test(e.key)){ setLayer(parseInt(e.key,10)); }
+  });
 
   // Init
-  load();
-  $('#currentRound').textContent = state.currentRound;
-  updateScore();
-  </script>
+  setLayer(0); updateUsed(); draw();
+})();
+</script>
 </body>
 </html>
