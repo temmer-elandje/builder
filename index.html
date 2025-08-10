@@ -110,4 +110,404 @@
         </div>
         <div class="row">
           <div class="col" style="min-width:180px;">
-            <label>Moe
+            <label>Moeilijkheid</label>
+            <select id="difficulty">
+              <option value="any">Gemengd</option>
+              <option value="easy">Makkelijk</option>
+              <option value="medium" selected>Normaal</option>
+              <option value="hard">Moeilijk</option>
+            </select>
+          </div>
+          <div class="col" style="min-width:220px;">
+            <label>Rondes (0 = onbeperkt)</label>
+            <input type="number" id="rounds" min="0" max="99" value="0" />
+          </div>
+        </div>
+        <div class="col">
+          <label>Eigen woorden (één per regel, optioneel)</label>
+          <textarea id="customWords" rows="4" placeholder="bijv. raket\nbrug\nwaaier"></textarea>
+        </div>
+        <div class="row">
+          <button class="btn btn-accent" id="startBtn">Start spel</button>
+          <button class="btn btn-ghost" id="importBtn">Importeer woordenlijst (JSON)</button>
+          <input id="fileInput" type="file" accept="application/json" style="display:none" />
+        </div>
+      </div>
+
+      <div class="col">
+        <h3 style="margin:0">Spelregels</h3>
+        <ul style="margin-top:6px; line-height:1.6; color:var(--muted)">
+          <li>De Bouwer ziet het woord en bouwt het met <b>maximaal 5 LEGO-blokjes</b>.</li>
+          <li>De Rader ziet geen woord, alleen de timer.</li>
+          <li>Is het geraden? Klik <b>✓ Goed</b>. Niet gelukt? Klik <b>✗ Mis</b>.</li>
+          <li>Gebruik je eigen woorden of de ingebouwde lijsten per moeilijkheidsgraad.</li>
+          <li>Speel solo (tijd verbeteren) of in teams (punten tellen).</li>
+        </ul>
+        <details>
+          <summary>Geavanceerd</summary>
+          <ul class="small">
+            <li>Woorden slaan niet op naar een server; alles blijft lokaal in je browser.</li>
+            <li>Via <b>Export</b> &amp; <b>Import</b> kun je lijsten meenemen naar een ander device.</li>
+            <li>Toetsen: <span class="mono">N</span> = Volgend woord, <span class="mono">Space</span> = Start/Pause, <span class="mono">G</span> = ✓ Goed, <span class="mono">M</span> = ✗ Mis.</li>
+          </ul>
+          <div class="row" style="margin-top:8px; gap:8px;">
+            <button class="btn btn-ghost" id="exportBtn">Exporteer woordenlijst</button>
+            <button class="btn btn-warning" id="resetStatsBtn" title="Wis score en ronde">Reset score</button>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="card" id="playCard" style="display:none">
+      <div class="grid two">
+        <div class="col">
+          <div class="row" style="justify-content: space-between; align-items: center;">
+            <div class="pill">Max 5 blokjes</div>
+            <div class="pill">Moeilijkheid: <span id="diffLabel">-</span></div>
+            <div class="pill">Tijd: <span id="timeLeft">60</span>s</div>
+          </div>
+          <div style="margin-top:14px; text-align:center">
+            <div id="word" class="word hidden-word" aria-live="polite">Woord verborgen</div>
+            <div class="row" style="justify-content:center; margin-top:12px;">
+              <button class="btn btn-ghost" id="toggleWordBtn">Toon woord (Bouwer)</button>
+              <button class="btn btn-ghost" id="newWordBtn" title="Nieuw willekeurig woord">Nieuw woord (N)</button>
+            </div>
+          </div>
+          <div class="row" style="margin-top:12px; justify-content:center; gap:10px;">
+            <button class="btn btn-primary" id="startPauseBtn">Start (Space)</button>
+            <button class="btn btn-accent" id="goodBtn">✓ Goed (G)</button>
+            <button class="btn btn-danger" id="missBtn">✗ Mis (M)</button>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" style="padding:14px;">
+            <div class="small">Scorebord</div>
+            <div class="row" style="align-items: center; gap: 12px; margin-top:6px;">
+              <div class="pill">Goed: <b id="scoreGood">0</b></div>
+              <div class="pill">Mis: <b id="scoreMiss">0</b></div>
+              <div class="pill">Totaal: <b id="scoreTotal">0</b></div>
+            </div>
+            <div style="margin-top:12px;">
+              <label class="small">Rondes</label>
+              <div class="row" style="gap: 6px;">
+                <button class="btn btn-ghost" id="prevRoundBtn" title="Vorige ronde">◀︎</button>
+                <div class="pill">Huidige: <b id="currentRound">1</b></div>
+                <button class="btn btn-ghost" id="nextRoundBtn" title="Volgende ronde">▶︎</button>
+              </div>
+            </div>
+            <div style="margin-top:12px;">
+              <label class="small">Sessie log</label>
+              <div id="log" style="height: 150px; overflow:auto; padding:8px; border:1px solid rgba(255,255,255,.08); border-radius:12px; background: rgba(255,255,255,.03);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">Gemaakt voor GitHub Pages · Offline-vriendelijk · Geen trackers</div>
+  </div>
+
+  <script>
+  // --- Utility helpers ---
+  const $ = (q) => document.querySelector(q);
+  const on = (el, ev, fn) => el.addEventListener(ev, fn);
+  const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+  // --- Default word lists ---
+  const LISTS = {
+    easy: [
+      "auto", "huis", "boom", "vis", "kat", "hond", "brug", "boot", "zon", "maan",
+      "bal", "taart", "bloem", "trein", "stoel", "tafel", "munt", "sleutel", "vlag", "molen",
+      "appel", "ijs", "bed", "boek", "vogel", "kop", "bus", "fiets", "raam", "deur"
+    ],
+    medium: [
+      "raket", "robot", "camera", "toren", "kasteel", "gieter", "schaar", "klok", "trommel", "ladder",
+      "gitaar", "helikopter", "krab", "tand", "zwaan", "paraplu", "vulkaan", "pinguïn", "tractor", "kruiwagen",
+      "zwaartekraan", "duikbril", "kaars", "slede", "rups", "ufo", "dinosaurus", "telescoop", "schommel", "glijbaan"
+    ],
+    hard: [
+      "ruimtestation", "tandarts", "theater", "pizzasnijder", "kompas", "tolbrug", "elektrische gitaar", "brandweerwagen", "luchtballon", "kano",
+      "meetlat", "magnetron", "schipbreuk", "skilift", "zandloper", "koekoeksklok", "kruimeldief", "zonnewijzer", "doolhof", "kabelbaan",
+      "periscoop", "sterrenbeeld", "schrijfmachine", "graafmachine", "regenboog", "laserzwaard", "duikboot", "recycler", "tolkantoor", "zwerfkei"
+    ]
+  };
+
+  // Clean up a few too-hard words for 5-brick constraint
+  LISTS.medium = LISTS.medium.filter(w => w !== "zwaartekraan");
+
+  // --- State ---
+  let state = {
+    role: null, // 'builder' | 'guesser'
+    time: 60,
+    difficulty: 'medium',
+    rounds: 0, // 0 = infinite
+    currentRound: 1,
+    pool: [],
+    used: new Set(),
+    word: null,
+    running: false,
+    timerId: null,
+    left: 60,
+    scoreGood: 0,
+    scoreMiss: 0,
+    log: []
+  };
+
+  // --- DOM refs ---
+  const setupCard = $('#setupCard');
+  const playCard = $('#playCard');
+  const wordEl = $('#word');
+  const timeLeft = $('#timeLeft');
+  const sOk = $('#s-ok');
+  const sNo = $('#s-no');
+  const scoreGood = $('#scoreGood');
+  const scoreMiss = $('#scoreMiss');
+  const scoreTotal = $('#scoreTotal');
+  const logEl = $('#log');
+
+  // --- Persistence ---
+  const save = () => localStorage.setItem('lego5_state', JSON.stringify({
+    scoreGood: state.scoreGood, scoreMiss: state.scoreMiss, currentRound: state.currentRound
+  }));
+  const load = () => {
+    try {
+      const s = JSON.parse(localStorage.getItem('lego5_state'));
+      if (!s) return;
+      state.scoreGood = s.scoreGood || 0;
+      state.scoreMiss = s.scoreMiss || 0;
+      state.currentRound = s.currentRound || 1;
+      updateScore();
+      $('#currentRound').textContent = state.currentRound;
+    } catch {}
+  };
+
+  // --- Word management ---
+  function buildPool(difficulty, custom) {
+    let p = [];
+    if (difficulty === 'any') p = [...LISTS.easy, ...LISTS.medium, ...LISTS.hard];
+    else p = [...(LISTS[difficulty] || [])];
+    if (custom && custom.length) p = p.concat(custom);
+    // shuffle
+    for (let i = p.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [p[i], p[j]] = [p[j], p[i]];
+    }
+    return p;
+  }
+
+  function pickWord() {
+    if (!state.pool.length) {
+      // refill from used
+      state.used = new Set();
+      state.pool = buildPool(state.difficulty, state.custom);
+    }
+    let w = state.pool.pop();
+    // Avoid immediate repeats
+    while (state.used.has(w) && state.pool.length) w = state.pool.pop();
+    state.used.add(w);
+    state.word = w;
+    wordEl.textContent = w;
+  }
+
+  // --- UI updates ---
+  function updateScore() {
+    sOk.textContent = state.scoreGood + '✓';
+    sNo.textContent = state.scoreMiss + '✗';
+    scoreGood.textContent = state.scoreGood;
+    scoreMiss.textContent = state.scoreMiss;
+    scoreTotal.textContent = state.scoreGood + state.scoreMiss;
+    save();
+  }
+
+  function appendLog(entry) {
+    const line = document.createElement('div');
+    line.className = 'small';
+    const ts = new Date().toLocaleTimeString();
+    line.textContent = `[${ts}] ${entry}`;
+    logEl.prepend(line);
+  }
+
+  function setRole(r) {
+    state.role = r;
+    $('#diffLabel').textContent = labelForDifficulty(state.difficulty);
+    $('#roundNum').textContent = state.currentRound;
+    $('#totalRounds').textContent = state.rounds === 0 ? '∞' : state.rounds;
+    setupCard.style.display = 'none';
+    playCard.style.display = 'block';
+    pickWord();
+    if (r === 'builder') {
+      wordEl.classList.remove('hidden-word');
+      $('#toggleWordBtn').textContent = 'Verberg woord';
+    } else {
+      wordEl.classList.add('hidden-word');
+      $('#toggleWordBtn').textContent = 'Toon woord (Bouwer)';
+    }
+    state.left = state.time;
+    timeLeft.textContent = state.left;
+  }
+
+  function labelForDifficulty(d) {
+    return d === 'easy' ? 'Makkelijk' : d === 'medium' ? 'Normaal' : d === 'hard' ? 'Moeilijk' : 'Gemengd';
+  }
+
+  function startTimer() {
+    if (state.running) return;
+    state.running = true;
+    $('#startPauseBtn').textContent = 'Pauze (Space)';
+    state.timerId = setInterval(() => {
+      state.left -= 1;
+      timeLeft.textContent = state.left;
+      if (state.left <= 0) {
+        pauseTimer();
+        beep();
+        appendLog(`⏰ Tijd voorbij bij woord: "${state.word}"`);
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    if (!state.running) return;
+    state.running = false;
+    $('#startPauseBtn').textContent = 'Start (Space)';
+    clearInterval(state.timerId);
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    state.left = state.time;
+    timeLeft.textContent = state.left;
+  }
+
+  function nextRound() {
+    if (state.rounds && state.currentRound >= state.rounds) return; // capped
+    state.currentRound += 1;
+    $('#roundNum').textContent = state.currentRound;
+    $('#currentRound').textContent = state.currentRound;
+    save();
+  }
+
+  function prevRound() {
+    state.currentRound = Math.max(1, state.currentRound - 1);
+    $('#roundNum').textContent = state.currentRound;
+    $('#currentRound').textContent = state.currentRound;
+    save();
+  }
+
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'square';
+      o.frequency.value = 880;
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + 0.01);
+      o.start();
+      setTimeout(() => { g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2); o.stop(ctx.currentTime + 0.25); }, 200);
+    } catch {}
+  }
+
+  // --- Events ---
+  on($('#roleBuilder'), 'click', () => setRole('builder'));
+  on($('#roleGuesser'), 'click', () => setRole('guesser'));
+
+  on($('#startBtn'), 'click', () => {
+    state.time = clamp(parseInt($('#roundTime').value || '60', 10), 10, 300);
+    state.left = state.time;
+    state.difficulty = $('#difficulty').value;
+    state.rounds = clamp(parseInt($('#rounds').value || '0', 10), 0, 99);
+
+    const customRaw = $('#customWords').value.trim();
+    state.custom = customRaw ? customRaw.split(/\n+/).map(s => s.trim()).filter(Boolean) : [];
+
+    state.pool = buildPool(state.difficulty, state.custom);
+    $('#totalRounds').textContent = state.rounds === 0 ? '∞' : state.rounds;
+
+    // jump to role screen only after choosing a role
+    appendLog('🎮 Spel gestart');
+  });
+
+  on($('#toggleWordBtn'), 'click', () => {
+    if (state.role === 'guesser') {
+      // safety: confirm accidental reveal
+      if (wordEl.classList.contains('hidden-word')) {
+        if (!confirm('Alleen de bouwer mag het woord zien. Toch tonen?')) return;
+      }
+    }
+    wordEl.classList.toggle('hidden-word');
+    $('#toggleWordBtn').textContent = wordEl.classList.contains('hidden-word') ? 'Toon woord (Bouwer)' : 'Verberg woord';
+  });
+
+  on($('#newWordBtn'), 'click', () => { pickWord(); appendLog('🔀 Nieuw woord gekozen'); resetTimer(); });
+  on($('#startPauseBtn'), 'click', () => state.running ? pauseTimer() : startTimer());
+  on($('#goodBtn'), 'click', () => {
+    state.scoreGood++; updateScore(); appendLog(`✅ Goed: "${state.word}"`);
+    nextWordOrRound();
+  });
+  on($('#missBtn'), 'click', () => {
+    state.scoreMiss++; updateScore(); appendLog(`❌ Mis: "${state.word}"`);
+    nextWordOrRound();
+  });
+
+  on($('#prevRoundBtn'), 'click', () => prevRound());
+  on($('#nextRoundBtn'), 'click', () => {
+    if (state.rounds && state.currentRound >= state.rounds) return;
+    nextRound();
+  });
+
+  on($('#exportBtn'), 'click', () => {
+    const data = { easy: LISTS.easy, medium: LISTS.medium, hard: LISTS.hard };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'lego5_woorden.json'; a.click(); URL.revokeObjectURL(url);
+  });
+  on($('#importBtn'), 'click', () => $('#fileInput').click());
+  on($('#fileInput'), 'change', (e) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (data.easy && data.medium && data.hard) {
+          LISTS.easy = data.easy; LISTS.medium = data.medium; LISTS.hard = data.hard;
+          appendLog('📥 Woordenlijst geïmporteerd');
+          alert('Woordenlijst geïmporteerd!');
+        } else {
+          alert('Ongeldig JSON-formaat. Verwacht key: easy, medium, hard');
+        }
+      } catch (err) { alert('Kon JSON niet lezen.'); }
+    };
+    reader.readAsText(file);
+  });
+
+  // Keyboard shortcuts
+  on(document, 'keydown', (e) => {
+    if (e.target.matches('input, textarea')) return; // ignore typing in inputs
+    if (e.key.toLowerCase() === 'n') { $('#newWordBtn').click(); }
+    if (e.key === ' ') { e.preventDefault(); $('#startPauseBtn').click(); }
+    if (e.key.toLowerCase() === 'g') { $('#goodBtn').click(); }
+    if (e.key.toLowerCase() === 'm') { $('#missBtn').click(); }
+  });
+
+  function nextWordOrRound() {
+    if (!state.rounds) { $('#newWordBtn').click(); resetTimer(); return; }
+    // advance within capped rounds
+    if (state.currentRound < state.rounds) {
+      nextRound(); $('#newWordBtn').click(); resetTimer();
+    } else {
+      pauseTimer();
+      appendLog('🏁 Einde van de sessie');
+      alert(`Klaar! Goed: ${state.scoreGood} · Mis: ${state.scoreMiss}`);
+    }
+  }
+
+  // Init
+  load();
+  $('#currentRound').textContent = state.currentRound;
+  updateScore();
+  </script>
+</body>
+</html>
